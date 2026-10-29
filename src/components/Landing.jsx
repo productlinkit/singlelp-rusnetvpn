@@ -1,21 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Globe2, ShieldCheck, RotateCcw, Server, Check } from 'lucide-react'
+import { ShieldCheck, Lock, EyeOff, Server, Check } from 'lucide-react'
 import Logo from './Logo.jsx'
 import Button from './Button.jsx'
 import PhoneMockup, { useDemoLoop, LOOP_MS } from './PhoneMockup.jsx'
 import { track, EVENTS } from '../lib/track.js'
-import { PLANS, BEST_DEAL, money } from '../lib/plans.js'
 
-// Only claims stated on rusnetvpn.vercel.app: server/country counts, the no-logs
-// policy and the 30-day refund (FAQ 07: "we refund it in full").
+// Only claims stated on rusnetvpn.vercel.app: encrypted VPN connections and the
+// no-logs policy. Nothing like "100% anonymous". (U+2011 keeps "Privacy‑Focused" on one line.)
 const BENEFITS = [
-  { icon: Globe2, title: '700+ servers', text: 'in 90+ countries', mTitle: '700+ servers', mText: '90+ countries' },
-  { icon: ShieldCheck, title: 'Strict no-logs', text: 'No browsing or traffic logs', mTitle: 'No-logs policy', mText: 'Strict policy' },
-  { icon: RotateCcw, title: '30-day refund', text: 'Money-back guarantee', mTitle: '30-day refund', mText: 'Money-back' },
+  { icon: ShieldCheck, title: 'Secure Connection', text: 'Protected VPN connection', mTitle: 'Secure Connection' },
+  { icon: Lock, title: 'Encrypted Traffic', text: 'Sent through an encrypted tunnel', mTitle: 'Encrypted Traffic' },
+  { icon: EyeOff, title: 'Privacy‑Focused', text: 'Strict no-logs policy', mTitle: 'Privacy‑Focused' },
 ]
-
-const best = PLANS.find((p) => p.id === BEST_DEAL)
 
 // The device is drawn at one fixed size and scaled to whatever height is left,
 // so on a short phone it shrinks as a whole instead of squashing its insides.
@@ -75,10 +72,11 @@ export default function Landing({ onStart }) {
           <div className="contents wide:flex wide:flex-col wide:justify-center">
             <div className="order-1 text-center wide:text-left">
               <motion.h1 {...rise(.05)} className="text-[clamp(30px,8.6vw,40px)] text-balance sm:text-[52px] lg:text-[clamp(52px,5.6vw,80px)] short:text-[clamp(26px,4.4vw,36px)]!">
-                Privacy Shouldn’t Be <span className="font-light tracking-[-.026em] text-red">Complicated.</span>
+                Your Privacy. <span className="font-light tracking-[-.026em] text-red">Our Priority.</span>
               </motion.h1>
               <motion.p {...rise(.12)} className="mx-auto mt-3 max-w-[19rem] text-[14.5px] leading-[1.55] text-body sm:mt-4 sm:max-w-[30rem] sm:text-[17px] wide:mx-0 lg:mt-6 lg:text-[18.5px] lg:leading-[1.6] short:mt-2! short:text-[14px]!">
-                Protect your connection with a VPN that’s simple to set up and easy to use.
+                <b className="block font-semibold text-ink">Secure Connection. Private Browsing.</b>
+                Stay protected with encrypted VPN connections designed to keep your online activity more private.
               </motion.p>
             </div>
 
@@ -113,11 +111,10 @@ export default function Landing({ onStart }) {
                   className="w-full sm:w-auto"
                   onClick={() => { track(EVENTS.CTA_CLICKED, { location: 'hero' }); onStart() }}
                 >
-                  Get RusVPN
+                  Protect My Privacy
                 </Button>
                 <p className="text-center text-[12.5px] leading-snug text-muted sm:text-left sm:text-[13.5px] short:text-[12.5px]!">
-                  From <b className="tnum font-semibold text-ink">{money(best.perMonth)}/mo</b><span className="sm:hidden"> · No password needed</span><span className="max-sm:hidden"> on the 1-year plan.</span>
-                  <br className="hidden sm:block" /><span className="max-sm:hidden"> No password needed to start.</span>
+                  Choose a plan • Pay securely • Get access by email
                 </p>
               </motion.div>
             </div>
