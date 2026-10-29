@@ -15,6 +15,8 @@ const BENEFITS = [
   { icon: RotateCcw, title: '30-day refund', text: 'Money-back guarantee', mTitle: '30-day refund', mText: 'Money-back' },
 ]
 
+const STEPS = [['Pick a server', 'Server'], ['Connect', 'Connect'], ['Settings', 'Settings']]
+
 const best = PLANS.find((p) => p.id === BEST_DEAL)
 
 // The device is drawn at one fixed size and scaled to whatever height is left,
@@ -45,11 +47,16 @@ const rise = (d = 0) => ({
 })
 
 export default function Landing({ onStart }) {
-  const demo = useDemoLoop()
-  const on = demo === 'on'
+  const scene = useDemoLoop()
+  const on = scene.vpn === 'on'
+  // which of the three demo beats is playing
+  const beat = scene.screen === 'menu' ? 2
+    : scene.screen === 'servers' || (scene.vpn === 'off' && scene.tap !== 'connect') ? 0 : 1
   const [fitRef, { scale, room }] = useFit()
   // Floating cards may tuck 40px over the device, never past the column edge.
   const showChips = room >= 50
+  // the floating cards would sit on the list and menu screens, so they step aside
+  const chipsVisible = scene.screen === 'home'
   const chipL = Math.min(140, room + 40)
   const chipR = Math.min(128, room + 40)
 
@@ -132,14 +139,14 @@ export default function Landing({ onStart }) {
             <div ref={fitRef} className="absolute inset-0 flex items-center justify-center">
             <div className="relative flex-none" style={{ width: BASE_W * scale, height: BASE_H * scale }}>
             <div className="absolute left-0 top-0 origin-top-left" style={{ width: BASE_W, height: BASE_H, transform: `scale(${scale})` }}>
-              <PhoneMockup state={demo} className="h-full" />
+              <PhoneMockup scene={scene} className="h-full" />
 
               {/* floating chips, in the style of the site's hero chips */}
-              <motion.div {...rise(.6)} style={{ left: -chipL }} className={`absolute top-[12%] items-center gap-2 whitespace-nowrap rounded-full border border-white/70 bg-white/90 px-4 py-2.5 text-[13.5px] font-semibold shadow-[0_14px_30px_-16px_rgba(14,18,22,.5)] backdrop-blur-md ${showChips ? 'hidden sm:inline-flex' : 'hidden'}`}>
+              <motion.div {...rise(.6)} style={{ left: -chipL }} animate={{ opacity: chipsVisible ? 1 : 0, y: chipsVisible ? 0 : 8 }} transition={{ duration: .35 }} className={`absolute top-[12%] items-center gap-2 whitespace-nowrap rounded-full border border-white/70 bg-white/90 px-4 py-2.5 text-[13.5px] font-semibold shadow-[0_14px_30px_-16px_rgba(14,18,22,.5)] backdrop-blur-md ${showChips ? 'hidden sm:inline-flex' : 'hidden'}`}>
                 <Server className="h-3.5 w-3.5 text-red" aria-hidden="true" /> 700+ servers worldwide
               </motion.div>
 
-              <motion.div {...rise(.75)} style={{ right: -chipR }} className={`absolute top-[34%] w-[210px] rounded-[20px] border border-white/80 bg-white/95 p-3.5 shadow-[0_30px_60px_-34px_rgba(14,18,22,.45)] backdrop-blur-lg ${showChips ? 'hidden sm:block' : 'hidden'}`} aria-hidden="true">
+              <motion.div {...rise(.75)} style={{ right: -chipR }} animate={{ opacity: chipsVisible ? 1 : 0, y: chipsVisible ? 0 : 8 }} transition={{ duration: .35 }} className={`absolute top-[34%] w-[210px] rounded-[20px] border border-white/80 bg-white/95 p-3.5 shadow-[0_30px_60px_-34px_rgba(14,18,22,.45)] backdrop-blur-lg ${showChips ? 'hidden sm:block' : 'hidden'}`} aria-hidden="true">
                 <div className="flex items-center justify-between">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span key={on ? 'on' : 'off'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -147,7 +154,7 @@ export default function Landing({ onStart }) {
                       <span className={`relative h-[7px] w-[7px] rounded-full ${on ? 'bg-green-ok' : 'bg-line-ui'}`}>
                         {on && <span className="absolute inset-0 animate-ping rounded-full bg-green-ok/60" />}
                       </span>
-                      {on ? 'Protected' : demo === 'connecting' ? 'Connecting…' : 'Not connected'}
+                      {on ? 'Protected' : scene.vpn === 'connecting' ? 'Connecting…' : 'Not connected'}
                     </motion.span>
                   </AnimatePresence>
                 </div>
@@ -165,9 +172,19 @@ export default function Landing({ onStart }) {
             </div>
 
             </div>
-            <p className="mt-2 flex-none text-center text-[10.5px] text-muted sm:text-[11px] short:mt-1!">
-              Animated app preview — not a live connection
-            </p>
+            <div className="mt-2.5 flex-none text-center short:mt-1.5!">
+              <ol className="inline-flex items-center gap-1 rounded-full border border-ink/[.07] bg-white/80 p-1 text-[11px] font-semibold backdrop-blur short:text-[10px]!" aria-label="What the preview shows">
+                {STEPS.map(([label, brief], i) => (
+                  <li key={label} className="relative whitespace-nowrap px-2.5 py-1 sm:px-3 short:px-2!">
+                    {beat === i && <motion.span layoutId="beat" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
+                    <span className={`relative transition-colors duration-300 ${beat === i ? 'text-white' : 'text-muted'}`}>
+                      <span className="tnum">{i + 1}</span> <span className="short:hidden">{label}</span><span className="hidden short:inline">{brief}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-1.5 text-[10.5px] text-muted sm:text-[11px] short:mt-1! short:text-[9.5px]!">Animated app preview — not a live connection</p>
+            </div>
           </motion.div>
         </div>
       </div>
