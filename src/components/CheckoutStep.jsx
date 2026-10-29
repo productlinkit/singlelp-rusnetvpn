@@ -164,7 +164,7 @@ export default function CheckoutStep({ email, planId, setPlanId, method, setMeth
       </div>
 
       {/* mobile: pay bar pinned to the thumb */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink/[.08] bg-paper/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink/[.08] bg-paper/95 px-5 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur-lg lg:hidden">
         <div className="mx-auto flex max-w-[520px] items-center gap-3">
           <div className="min-w-0 flex-1">
             <b className="tnum block text-[18px] font-bold leading-tight text-ink">{money(plan.price)}</b>

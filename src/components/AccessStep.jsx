@@ -90,13 +90,13 @@ export default function AccessStep({ email, plan }) {
               {ordered.map(({ id, label, sub, icon: Icon }) => (
                 <li key={id} className={id === mine ? 'col-span-2 sm:col-span-3' : ''}>
                   <a href="#" onClick={(e) => { e.preventDefault(); track('app_download_clicked', { platform: id }) }}
-                    className={`flex items-center gap-3 rounded-2xl border p-3.5 transition hover:border-ink/40 ${id === mine ? 'border-ink bg-ink text-white hover:bg-ink-2' : 'border-ink/10 bg-white text-ink'}`}>
+                    className={`flex items-center gap-3 rounded-2xl border p-3.5 transition max-sm:gap-2.5 max-sm:px-3 hover:border-ink/40 ${id === mine ? 'border-ink bg-ink text-white hover:bg-ink-2' : 'border-ink/10 bg-white text-ink'}`}>
                     <Icon className="h-5 w-5 flex-none" aria-hidden="true" />
                     <span className="min-w-0 flex-1">
                       <b className="block text-[14px] font-semibold">{label}</b>
                       <span className={`block text-[11.5px] ${id === mine ? 'text-white/70' : 'text-muted'}`}>{id === mine ? 'Recommended for this device' : sub}</span>
                     </span>
-                    <Download className="h-4 w-4 flex-none opacity-70" aria-hidden="true" />
+                    <Download className={`h-4 w-4 flex-none opacity-70 ${id === mine ? '' : 'max-sm:hidden'}`} aria-hidden="true" />
                   </a>
                 </li>
               ))}

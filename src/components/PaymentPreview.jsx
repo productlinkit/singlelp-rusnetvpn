@@ -31,7 +31,7 @@ export default function PaymentPreview({ plan, method, email, onCancel, onResult
       onClick={(e) => { if (e.target === e.currentTarget && !busy) onCancel() }}>
       <motion.div role="dialog" aria-modal="true" aria-labelledby={`${id}-t`} aria-describedby={`${id}-d`}
         initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} transition={{ duration: .35, ease: [.21, .78, .26, 1] }}
-        className="w-full max-w-[420px] rounded-t-[28px] bg-white p-6 pb-[max(24px,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-[28px] sm:p-7">
+        className="w-full max-w-[420px] rounded-t-[28px] bg-white px-5 pt-6 pb-[max(24px,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-[28px] sm:p-7">
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted"><Lock className="h-3.5 w-3.5" aria-hidden="true" /> Payment provider</span>
           <button onClick={onCancel} disabled={busy} className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-paper disabled:opacity-40" aria-label="Cancel payment">

@@ -65,7 +65,7 @@ export default function Landing({ onStart }) {
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(14,18,22,.07)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_at_70%_45%,black,transparent_70%)]" />
       </div>
 
-      <div className="mx-auto flex w-full max-w-[1280px] flex-1 min-h-0 flex-col px-4 sm:px-8 lg:px-14 short:px-6!">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 min-h-0 flex-col px-5 sm:px-8 lg:px-14 short:px-6!">
         <motion.div {...rise(0)} className="flex flex-none items-center justify-center pt-4 sm:pt-6 lg:justify-start lg:pt-8 short:justify-start! short:pt-3!">
           <Logo className="h-6 w-auto text-ink sm:h-7 short:h-5!" />
         </motion.div>

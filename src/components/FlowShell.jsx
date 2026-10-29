@@ -8,10 +8,10 @@ const STEPS = ['Email', 'Plan & payment', 'Access']
 export default function FlowShell({ step, onBack, children, wide = false }) {
   return (
     <div className="min-h-dvh">
-      <header className="mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-4 pt-4 sm:px-8 sm:pt-6">
+      <header className="mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-5 pt-4 sm:px-8 sm:pt-6">
         <div className="flex items-center gap-2">
           {onBack ? (
-            <button onClick={onBack} className="-ml-2 grid h-10 w-10 place-items-center rounded-full text-ink hover:bg-ink/5" aria-label="Back">
+            <button onClick={onBack} className="flex h-10 w-10 items-center justify-start rounded-full text-ink hover:text-red" aria-label="Back">
               <ArrowLeft className="h-5 w-5" />
             </button>
           ) : null}
@@ -24,7 +24,7 @@ export default function FlowShell({ step, onBack, children, wide = false }) {
         )}
       </header>
 
-      <nav aria-label="Progress" className="mx-auto mt-5 w-full max-w-[1120px] px-4 sm:mt-7 sm:px-8">
+      <nav aria-label="Progress" className="mx-auto mt-5 w-full max-w-[1120px] px-5 sm:mt-7 sm:px-8">
         <ol className="mx-auto flex max-w-[400px] items-center gap-2 sm:max-w-none">
           {STEPS.map((label, i) => {
             const done = i < step
@@ -42,7 +42,7 @@ export default function FlowShell({ step, onBack, children, wide = false }) {
         </ol>
       </nav>
 
-      <div className={`mx-auto w-full px-4 pb-28 pt-8 sm:px-8 sm:pt-12 lg:pb-16 ${wide ? 'max-w-[1120px]' : 'max-w-[520px]'}`}>
+      <div className={`mx-auto w-full px-5 pb-28 pt-8 sm:px-8 sm:pt-12 lg:pb-16 ${wide ? 'max-w-[1120px]' : 'max-w-[520px]'}`}>
         {children}
       </div>
     </div>
