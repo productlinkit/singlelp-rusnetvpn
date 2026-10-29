@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Globe2, ShieldCheck, RotateCcw, Server, Check } from 'lucide-react'
 import Logo from './Logo.jsx'
 import Button from './Button.jsx'
-import PhoneMockup, { useDemoLoop } from './PhoneMockup.jsx'
+import PhoneMockup, { useDemoLoop, LOOP_MS } from './PhoneMockup.jsx'
 import { track, EVENTS } from '../lib/track.js'
 import { PLANS, BEST_DEAL, money } from '../lib/plans.js'
 
@@ -14,8 +14,6 @@ const BENEFITS = [
   { icon: ShieldCheck, title: 'Strict no-logs', text: 'No browsing or traffic logs', mTitle: 'No-logs policy', mText: 'Strict policy' },
   { icon: RotateCcw, title: '30-day refund', text: 'Money-back guarantee', mTitle: '30-day refund', mText: 'Money-back' },
 ]
-
-const STEPS = [['Pick a server', 'Server'], ['Connect', 'Connect'], ['Settings', 'Settings']]
 
 const best = PLANS.find((p) => p.id === BEST_DEAL)
 
@@ -49,9 +47,6 @@ const rise = (d = 0) => ({
 export default function Landing({ onStart }) {
   const scene = useDemoLoop()
   const on = scene.vpn === 'on'
-  // which of the three demo beats is playing
-  const beat = scene.screen === 'menu' ? 2
-    : scene.screen === 'servers' || (scene.vpn === 'off' && scene.tap !== 'connect') ? 0 : 1
   const [fitRef, { scale, room }] = useFit()
   // Floating cards may tuck 40px over the device, never past the column edge.
   const showChips = room >= 50
@@ -172,18 +167,20 @@ export default function Landing({ onStart }) {
             </div>
 
             </div>
-            <div className="mt-2.5 flex-none text-center short:mt-1.5!">
-              <ol className="inline-flex items-center gap-1 rounded-full border border-ink/[.07] bg-white/80 p-1 text-[11px] font-semibold backdrop-blur short:text-[10px]!" aria-label="What the preview shows">
-                {STEPS.map(([label, brief], i) => (
-                  <li key={label} className="relative whitespace-nowrap px-2.5 py-1 sm:px-3 short:px-2!">
-                    {beat === i && <motion.span layoutId="beat" className="absolute inset-0 rounded-full bg-ink" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
-                    <span className={`relative transition-colors duration-300 ${beat === i ? 'text-white' : 'text-muted'}`}>
-                      <span className="tnum">{i + 1}</span> <span className="short:hidden">{label}</span><span className="hidden short:inline">{brief}</span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-1.5 text-[10.5px] text-muted sm:text-[11px] short:mt-1! short:text-[9.5px]!">Animated app preview — not a live connection</p>
+            <div className="mt-3 flex-none text-center short:mt-1.5!">
+              {/* plays like a video: a thin timeline, nothing to click */}
+              <div className="mx-auto h-[3px] w-[min(220px,60%)] overflow-hidden rounded-full bg-ink/10" aria-hidden="true">
+                {scene.index !== undefined && (
+                  <motion.div
+                    key={scene.index}
+                    className="h-full rounded-full bg-red"
+                    initial={{ width: `${(scene.start / LOOP_MS) * 100}%` }}
+                    animate={{ width: `${((scene.start + scene.ms) / LOOP_MS) * 100}%` }}
+                    transition={{ duration: scene.ms / 1000, ease: 'linear' }}
+                  />
+                )}
+              </div>
+              <p className="mt-2 whitespace-nowrap text-[10.5px] text-muted sm:text-[11px] short:mt-1! short:text-[9.5px]!">Animated app preview — not a live connection</p>
             </div>
           </motion.div>
         </div>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import {
-  Power, Zap, RefreshCw, Home, Server, LayoutGrid, AlertCircle, Search, ChevronDown, ChevronRight,
-  ShieldCheck, Network, Bell, Crown, Headphones, FileText, Signal,
+  Power, Zap, RefreshCw, Home, Server, LayoutGrid, AlertCircle, Search, ChevronDown, ChevronUp, ChevronRight,
+  ShieldCheck, Cloud, Bell, Crown, Headphones, FileText, MapPin, LogOut,
 } from 'lucide-react'
 
 // A coded version of the real RusVPN app (Home, Server List, Menu) so the demo
@@ -28,6 +28,10 @@ const SCENES = [
 ]
 const STILL = { screen: 'home', vpn: 'on' }
 
+// where each scene starts on the loop's timeline, for the video-style progress bar
+export const LOOP_MS = SCENES.reduce((t, sc) => t + sc.ms, 0)
+const STARTS = SCENES.map((_, i) => SCENES.slice(0, i).reduce((t, sc) => t + sc.ms, 0))
+
 // Drives the looped demo. Reduced motion parks it on the connected home screen.
 export function useDemoLoop() {
   const reduce = useReducedMotion()
@@ -37,7 +41,7 @@ export function useDemoLoop() {
     const t = setTimeout(() => setI((n) => (n + 1) % SCENES.length), SCENES[i].ms)
     return () => clearTimeout(t)
   }, [i, reduce])
-  return reduce ? STILL : SCENES[i]
+  return reduce ? STILL : { ...SCENES[i], index: i, start: STARTS[i] }
 }
 
 /* ---------- flags (simple, recognisable at 20px) ---------- */
@@ -53,6 +57,10 @@ const FLAGS = {
   it: stripesV('#009246', '#fff', '#CE2B37'),
   es: <><rect width="30" height="20" fill="#AA151B" /><rect y="5" width="30" height="10" fill="#F1BF00" /></>,
   se: <><rect width="30" height="20" fill="#006AA7" /><rect x="9" width="3.5" height="20" fill="#FECC00" /><rect y="8.25" width="30" height="3.5" fill="#FECC00" /></>,
+  bg: stripesH('#fff', '#00966E', '#D62612'),
+  cl: <><rect width="30" height="20" fill="#fff" /><rect y="10" width="30" height="10" fill="#D52B1E" /><rect width="10" height="10" fill="#0039A6" /><path d="M5 2.6l.9 2.6h2.7l-2.2 1.6.8 2.6L5 7.8 2.8 9.4l.8-2.6-2.2-1.6h2.7z" fill="#fff" /></>,
+  cn: <><rect width="30" height="20" fill="#DE2910" /><path d="M6 2.5l1.1 3.2h3.4l-2.7 2 1 3.2L6 8.9 3.2 10.9l1-3.2-2.7-2h3.4z" fill="#FFDE00" /></>,
+  cr: <><rect width="30" height="20" fill="#002B7F" /><rect y="3.33" width="30" height="13.33" fill="#fff" /><rect y="6.67" width="30" height="6.67" fill="#CE1126" /></>,
   ch: <><rect width="30" height="20" fill="#DA291C" /><rect x="13" y="4" width="4" height="12" fill="#fff" /><rect x="9" y="8" width="12" height="4" fill="#fff" /></>,
   jp: <><rect width="30" height="20" fill="#fff" /><circle cx="15" cy="10" r="5.6" fill="#BC002D" /></>,
   nl: stripesH('#AE1C28', '#fff', '#21468B'),
@@ -159,93 +167,95 @@ function HomeScreen({ vpn, tap }) {
   )
 }
 
-const COUNTRIES = [['au', 'Australia'], ['at', 'Austria'], ['be', 'Belgium'], ['ca', 'Canada'], ['fr', 'France'], ['de', 'Germany'], ['it', 'Italy'], ['jp', 'Japan'], ['nl', 'Netherlands'], ['es', 'Spain'], ['se', 'Sweden'], ['ch', 'Switzerland'], ['gb', 'United Kingdom'], ['us', 'United States']]
-const CITIES = ['Melbourne', 'Sydney']
+// Matches the app's Server List: title + round search button, big flags,
+// closed countries in slate, the open one listing its named servers.
+const COUNTRIES = [['au', 'Australia'], ['at', 'Austria'], ['be', 'Belgium'], ['bg', 'Bulgaria'], ['ca', 'Canada'], ['cl', 'Chile'], ['cn', 'China'], ['cr', 'Costa-rica']]
+const SERVERS = ['The City Server', 'Lightning Speed', 'Stealth Mode']
 
 function ServersScreen({ open, tap }) {
   return (
-    <motion.div {...screenAnim} className="absolute inset-0 flex flex-col bg-white px-4 pt-7">
-      <p className="text-[17px] font-bold tracking-[-.02em] text-ink">Server List</p>
-      <div className="mt-2.5 flex h-8 items-center gap-1.5 rounded-xl border border-ink/25 px-2.5 text-[10.5px] text-muted">
-        <Search className="h-3.5 w-3.5" /> Search a server
+    <motion.div {...screenAnim} className="absolute inset-0 flex flex-col bg-white px-4 pt-9">
+      <div className="flex items-center justify-between">
+        <p className="text-[18px] font-semibold tracking-[-.02em] text-ink">Server List</p>
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-paper-2"><Search className="h-3.5 w-3.5 text-ink" /></span>
       </div>
-      <div className="mt-2 flex gap-1.5 text-[9.5px] font-semibold">
-        <span className="rounded-full bg-ink px-2.5 py-1 text-white">All countries</span>
-        <span className="rounded-full bg-paper px-2.5 py-1 text-ink-2">Favorites</span>
-      </div>
-      <ul className="mt-1.5 min-h-0 flex-1 overflow-hidden">
-        {COUNTRIES.map(([c, n], i) => (
-          <li key={c} className="border-b border-ink/[.08]">
-            <div className={`relative flex items-center gap-2.5 py-2 ${i === 0 && open ? 'text-red' : 'text-ink'}`}>
-              <Flag code={c} className="h-4 w-6" />
-              <span className="flex-1 text-[11.5px] font-semibold">{n}</span>
-              <ChevronDown className={`h-3.5 w-3.5 text-muted transition-transform duration-300 ${i === 0 && open ? 'rotate-180' : ''}`} />
-              {i === 0 && <Tap show={tap === 'country'} className="left-[45%] top-1/2" />}
-            </div>
-            {i === 0 && (
-              <AnimatePresence initial={false}>
-                {open && (
-                  <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }} className="overflow-hidden">
-                    {CITIES.map((city, j) => (
-                      <li key={city} className={`relative mb-1 flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[10.5px] ${j === 0 && tap === 'city' ? 'bg-red-tint' : 'bg-paper'}`}>
-                        <Signal className="h-3 w-3 text-green-ok" />
-                        <span className="flex-1 font-medium text-ink-2">{city}</span>
-                        {j === 0 && <span className="rounded-full bg-[#EEF3FF] px-1.5 text-[8.5px] font-semibold text-[#3B4A6B]">Fastest</span>}
-                        {j === 0 && <Tap show={tap === 'city'} className="left-[40%] top-1/2" />}
-                      </li>
-                    ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
-            )}
-          </li>
-        ))}
+      <ul className="mt-3 min-h-0 flex-1 overflow-hidden">
+        {COUNTRIES.map(([c, n], i) => {
+          const isOpen = i === 0 && open
+          return (
+            <li key={c} className={isOpen ? '' : 'border-b border-ink/25'}>
+              <div className="relative flex items-center gap-3.5 py-[13px]">
+                <Flag code={c} className="h-[17px] w-[26px] rounded-[3px]" />
+                <span className={`flex-1 text-[11.5px] font-semibold ${isOpen ? 'text-ink' : 'text-[#5D6B82]'}`}>{n}</span>
+                {isOpen ? <ChevronUp className="h-3.5 w-3.5 text-ink" /> : <ChevronDown className="h-3.5 w-3.5 text-ink" />}
+                {i === 0 && <Tap show={tap === 'country'} className="left-[40%] top-1/2" />}
+              </div>
+              {i === 0 && (
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }} className="overflow-hidden">
+                      {SERVERS.map((name, j) => {
+                        const picked = j === 0 && tap === 'city'
+                        return (
+                          <li key={name} className={`relative flex items-center gap-2.5 rounded-lg py-[9px] pl-2 pr-1 text-[9.5px] text-ink transition-colors ${picked ? 'bg-red-tint' : ''}`}>
+                            <MapPin className="h-3.5 w-3.5 flex-none" strokeWidth={1.8} />
+                            <span className="flex-1 font-medium tracking-[.01em]">{name}</span>
+                            <span className={`h-3 w-3 flex-none rounded-full border-[1.5px] border-red ${picked ? 'bg-red' : ''}`} />
+                            {j === 0 && <Tap show={tap === 'city'} className="left-[40%] top-1/2" />}
+                          </li>
+                        )
+                      })}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              )}
+            </li>
+          )
+        })}
       </ul>
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent" />
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
     </motion.div>
   )
 }
 
+// A year from today, written the way the app writes it ("12 March 2026").
+const EXPIRES = (() => {
+  const d = new Date()
+  d.setFullYear(d.getFullYear() + 1)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+})()
+
 const MENU = [
-  ['VPN Settings', [[ShieldCheck, 'Protocols'], [Network, 'Connection Settings'], [Bell, 'Notification Settings'], [Crown, 'My Subscription']]],
-  ['About us', [[Headphones, 'Support center'], [FileText, 'Terms and Privacy Policy']]],
+  ['VPN Settings', [[ShieldCheck, 'Protocols'], [Cloud, 'Connection Settings'], [Bell, 'Notification Settings'], [Crown, 'My Subscription']]],
+  ['About us', [[FileText, 'About us'], [Headphones, 'Support center'], [FileText, 'Terms and Privacy Policy'], [LogOut, 'Sign Out', true]]],
 ]
 
 function MenuScreen() {
   return (
-    <motion.div {...screenAnim} className="absolute inset-0 flex flex-col bg-white px-4 pt-7">
-      <p className="text-[17px] font-bold tracking-[-.02em] text-ink">Menu</p>
-      <div className="mt-2.5 flex items-center gap-2.5 rounded-2xl bg-red-tint p-3">
-        <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-red text-[12px] font-bold text-white">Y</span>
-        <span className="min-w-0">
-          <b className="block truncate text-[11px] font-semibold text-ink">you@email.com</b>
-          <span className="mt-0.5 inline-block rounded-[4px] bg-red px-1.5 py-[1px] text-[8px] font-bold uppercase tracking-[.04em] text-white">Premium · 1 Year</span>
-        </span>
-      </div>
-      <div className="mt-3">
-        <p className="border-b border-ink/70 pb-1 text-[12px] font-bold text-ink">Quick settings</p>
-        <ul>
-          {[[Power, 'Kill Switch', 'Cut internet if VPN drops'], [Zap, 'Auto-connect', 'Connect when the app opens']].map(([Icon, label, sub]) => (
-            <li key={label} className="flex items-center gap-2.5 border-b border-ink/[.06] py-[6px] text-ink">
-              <Icon className="h-3.5 w-3.5 text-ink-2" />
-              <span className="min-w-0 flex-1 leading-tight">
-                <b className="block text-[10.5px] font-medium">{label}</b>
-                <span className="block truncate text-[8.5px] text-muted">{sub}</span>
-              </span>
-              <span className="flex h-[15px] w-[26px] items-center justify-end rounded-full bg-red p-[2px]"><span className="h-[11px] w-[11px] rounded-full bg-white" /></span>
-            </li>
-          ))}
-        </ul>
+    <motion.div {...screenAnim} className="absolute inset-0 flex flex-col bg-white px-4 pt-8">
+      <p className="text-[19px] font-semibold tracking-[-.02em] text-ink">Menu</p>
+      <div className="mt-2.5 rounded-xl bg-[#FBE7E8] px-3 pb-3 pt-3.5">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-[#5E0B12]"><Crown className="h-4 w-4 fill-white text-white" /></span>
+          <span className="min-w-0 text-[9.5px] leading-[1.6] text-ink">
+            <span className="block truncate">demouser@email.com</span>
+            <span className="block">1 Year Subscription</span>
+          </span>
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-[8.5px] text-red-text">Expires on: {EXPIRES}</span>
+          <span className="rounded-full bg-red px-3 py-1.5 text-[9px] font-medium text-white">Expand Plan</span>
+        </div>
       </div>
       {MENU.map(([group, rows]) => (
-        <div key={group} className="mt-3">
-          <p className="border-b border-ink/70 pb-1 text-[12px] font-bold text-ink">{group}</p>
+        <div key={group} className="mt-3.5">
+          <p className="border-b border-[#5D6B82] pb-1.5 text-[16px] font-semibold tracking-[-.02em] text-ink">{group}</p>
           <ul>
-            {rows.map(([Icon, label]) => (
-              <li key={label} className="flex items-center gap-2.5 border-b border-ink/[.06] py-[7px] text-[10.5px] text-ink">
-                <Icon className="h-3.5 w-3.5 text-ink-2" />
+            {rows.map(([Icon, label, danger]) => (
+              <li key={label} className={`flex items-center gap-2.5 border-b border-ink/[.06] py-[9.5px] pl-2 text-[11px] ${danger ? 'text-red' : 'text-ink'}`}>
+                <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
                 <span className="flex-1 font-medium">{label}</span>
-                <ChevronRight className="h-3 w-3 text-muted" />
+                <ChevronRight className="h-3 w-3 text-ink" />
               </li>
             ))}
           </ul>
@@ -296,8 +306,8 @@ export default function PhoneMockup({ scene, className = '' }) {
                 return (
                   <span key={key} className="relative flex items-center justify-center">
                     {active && <motion.span layoutId="tab-pill" className="absolute inset-0 rounded-full bg-white shadow-sm" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-                    <span className={`relative flex items-center gap-1 py-1 ${active ? 'font-semibold text-ink' : ''}`}>
-                      <Icon className={`h-3 w-3 ${active ? 'text-red' : ''}`} fill={active && key === 'home' ? 'currentColor' : 'none'} /> {label}
+                    <span className={`relative flex items-center gap-1 py-1.5 ${active ? 'text-red' : 'text-ink-2'}`}>
+                      <Icon className="h-3 w-3" fill={active && key !== 'servers' ? 'currentColor' : 'none'} /> {label}
                     </span>
                     <Tap show={tap === `tab-${key}`} className="left-1/2 top-1/2" />
                   </span>
