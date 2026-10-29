@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Globe2, ShieldCheck, RotateCcw, Server } from 'lucide-react'
+import { Globe2, ShieldCheck, RotateCcw, Server, Check } from 'lucide-react'
 import Logo from './Logo.jsx'
 import Button from './Button.jsx'
 import PhoneMockup, { useDemoLoop } from './PhoneMockup.jsx'
@@ -11,8 +11,8 @@ import { PLANS, BEST_DEAL, money } from '../lib/plans.js'
 // policy and the 30-day refund (FAQ 07: "we refund it in full").
 const BENEFITS = [
   { icon: Globe2, title: '700+ servers', text: 'in 90+ countries', mTitle: '700+ servers', mText: '90+ countries' },
-  { icon: ShieldCheck, title: 'Strict no-logs', text: 'No browsing or traffic logs', mTitle: 'No-logs', mText: 'Strict policy' },
-  { icon: RotateCcw, title: '30-day money-back', text: 'Full refund, no questions', mTitle: '30-day', mText: 'Money-back' },
+  { icon: ShieldCheck, title: 'Strict no-logs', text: 'No browsing or traffic logs', mTitle: 'No-logs policy', mText: 'Strict policy' },
+  { icon: RotateCcw, title: '30-day money-back', text: 'Full refund, no questions', mTitle: '30-day refund', mText: 'Money-back' },
 ]
 
 const best = PLANS.find((p) => p.id === BEST_DEAL)
@@ -59,38 +59,40 @@ export default function Landing({ onStart }) {
       </div>
 
       <div className="mx-auto flex w-full max-w-[1280px] flex-1 min-h-0 flex-col px-4 sm:px-8 lg:px-14">
-        <motion.div {...rise(0)} className="flex flex-none items-center pt-4 sm:pt-6 lg:pt-8">
+        <motion.div {...rise(0)} className="flex flex-none items-center pt-4 max-sm:justify-center sm:pt-6 lg:pt-8">
           <Logo className="h-6 w-auto text-ink sm:h-7" />
         </motion.div>
 
-        <div className="grid flex-1 min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 py-3 sm:gap-5 sm:py-5 lg:grid-cols-[1.08fr_.92fr] lg:grid-rows-1 lg:items-center lg:gap-12 lg:py-6">
+        <div className="grid flex-1 min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-5 sm:gap-5 sm:py-5 lg:grid-cols-[1.08fr_.92fr] lg:grid-rows-1 lg:items-center lg:gap-12 lg:py-6">
           {/* copy column: on mobile its children join the grid so the phone sits between them */}
           <div className="contents lg:flex lg:flex-col lg:justify-center">
-            <div className="order-1">
-              <motion.h1 {...rise(.05)} className="text-[clamp(32px,9vw,44px)] text-balance sm:text-[52px] lg:text-[clamp(52px,5.6vw,80px)]">
+            <div className="order-1 max-sm:text-center">
+              <motion.h1 {...rise(.05)} className="text-[clamp(30px,8.6vw,40px)] text-balance sm:text-[52px] lg:text-[clamp(52px,5.6vw,80px)]">
                 Privacy Shouldn’t Be <span className="font-light tracking-[-.026em] text-red">Complicated.</span>
               </motion.h1>
-              <motion.p {...rise(.12)} className="mt-2.5 max-w-[30rem] text-[15px] leading-[1.5] text-body sm:mt-4 sm:text-[17px] lg:mt-6 lg:text-[18.5px] lg:leading-[1.6]">
+              <motion.p {...rise(.12)} className="mt-3 max-w-[30rem] text-[14.5px] leading-[1.55] text-body max-sm:mx-auto max-sm:max-w-[19rem] sm:mt-4 sm:text-[17px] lg:mt-6 lg:text-[18.5px] lg:leading-[1.6]">
                 Protect your connection with a VPN that’s simple to set up and easy to use.
               </motion.p>
             </div>
 
             <div className="order-3 lg:mt-9">
-              <motion.ul {...rise(.2)} className="grid grid-cols-3 gap-2 sm:gap-3 lg:max-w-[34rem]" aria-label="What you get">
+              <motion.ul {...rise(.2)} className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 sm:grid sm:grid-cols-3 sm:gap-3 lg:max-w-[34rem]" aria-label="What you get">
                 {BENEFITS.map(({ icon: Icon, title, text, mTitle, mText }) => (
-                  <li key={title} className="flex items-center justify-center gap-2 rounded-2xl border border-ink/[.07] bg-white/70 px-1.5 py-2 text-center backdrop-blur sm:items-start sm:justify-start sm:gap-2.5 sm:p-3.5 sm:text-left">
+                  <li key={title} className="flex items-center gap-1.5 sm:items-start sm:gap-2.5 sm:rounded-2xl sm:border sm:border-ink/[.07] sm:bg-white/70 sm:p-3.5 sm:backdrop-blur">
                     <span className="hidden h-8 w-8 flex-none place-items-center rounded-full bg-red-tint text-red-text sm:grid">
                       <Icon className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
                     </span>
-                    <span className="min-w-0">
-                      <b className="block text-[12.5px] font-semibold leading-tight text-ink sm:text-[14px]"><span className="sm:hidden">{mTitle}</span><span className="max-sm:hidden">{title}</span></b>
-                      <span className="mt-0.5 block text-[11px] leading-snug text-muted sm:text-[13px]"><span className="sm:hidden">{mText}</span><span className="max-sm:hidden">{text}</span></span>
+                    <Check className="h-3.5 w-3.5 flex-none text-red sm:hidden" strokeWidth={3} aria-hidden="true" />
+                    <span className="text-[12.5px] font-semibold text-ink sm:hidden">{mTitle}</span>
+                    <span className="min-w-0 max-sm:hidden">
+                      <b className="block text-[14px] font-semibold leading-tight text-ink">{title}</b>
+                      <span className="mt-0.5 block text-[13px] leading-snug text-muted">{text}</span>
                     </span>
                   </li>
                 ))}
               </motion.ul>
 
-              <motion.div {...rise(.28)} className="mt-3 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:items-center sm:gap-5 lg:mt-8">
+              <motion.div {...rise(.28)} className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:items-center sm:gap-5 lg:mt-8">
                 <Button
                   className="w-full sm:w-auto"
                   onClick={() => { track(EVENTS.CTA_CLICKED, { location: 'hero' }); onStart() }}
@@ -98,8 +100,8 @@ export default function Landing({ onStart }) {
                   Get RusVPN
                 </Button>
                 <p className="text-center text-[12.5px] leading-snug text-muted sm:text-left sm:text-[13.5px]">
-                  From <b className="tnum font-semibold text-ink">{money(best.perMonth)}/mo</b> on the 1-year plan.
-                  <br className="hidden sm:block" /> No password needed to start.
+                  From <b className="tnum font-semibold text-ink">{money(best.perMonth)}/mo</b><span className="sm:hidden"> · No password needed</span><span className="max-sm:hidden"> on the 1-year plan.</span>
+                  <br className="hidden sm:block" /><span className="max-sm:hidden"> No password needed to start.</span>
                 </p>
               </motion.div>
             </div>
@@ -110,8 +112,9 @@ export default function Landing({ onStart }) {
             initial={{ opacity: 0, y: 24, scale: .97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: .9, delay: .15, ease: [.21, .78, .26, 1] }}
-            className="relative order-2 h-full min-h-0 lg:h-[min(680px,80vh)]"
+            className="relative order-2 flex h-full max-h-[min(440px,100%)] min-h-0 flex-col self-center lg:h-[min(680px,80vh)] lg:max-h-none"
           >
+            <div className="relative min-h-0 flex-1">
             <div ref={fitRef} className="absolute inset-0 flex items-center justify-center">
             <div className="relative flex-none" style={{ width: BASE_W * scale, height: BASE_H * scale }}>
             <div className="absolute left-0 top-0 origin-top-left" style={{ width: BASE_W, height: BASE_H, transform: `scale(${scale})` }}>
@@ -147,12 +150,10 @@ export default function Landing({ onStart }) {
             </div>
             </div>
 
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[calc(100%+4px)] whitespace-nowrap text-[11px] text-muted max-lg:hidden">
+            </div>
+            <p className="mt-2 flex-none text-center text-[10.5px] text-muted sm:text-[11px]">
               Animated app preview — not a live connection
-            </span>
-            <span className="absolute right-0 top-0 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-medium text-muted backdrop-blur lg:hidden">
-              App preview
-            </span>
+            </p>
           </motion.div>
         </div>
       </div>
