@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* Tokens taken from rusnetvpn.vercel.app (commit 8fc5753) so the campaign page
+   reads as the same brand: red accent, warm paper, ink, Host Grotesk. */
+@theme {
+  --font-sans: 'Host Grotesk', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-red: #E12730;
+  --color-red-2: #F0353F;
+  --color-red-deep: #A5121A;
+  --color-red-fill: #C81E27;
+  --color-red-fill-2: #D92A33;
+  --color-red-text: #BE1A23;
+  --color-red-tint: #FFF0F0;
+
+  --color-ink: #0E1216;
+  --color-ink-2: #1C2430;
+  --color-body: #4E5964;
+  --color-muted: #5C636B;
+  --color-paper: #F3F2EF;
+  --color-paper-2: #EBEAE5;
+  --color-line-ui: #7C838B;
+  --color-green-ok: #12B76A;
+  --color-green-text: #087040;
+  --color-green-tint: #E9F9F0;
+  --color-amber-tint: #FFF4E5;
+  --color-amber-text: #B54708;
+
+  --ease-enter: cubic-bezier(.21,.78,.26,1);
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 { letter-spacing: -.032em; line-height: 1.03; font-weight: 700; }
+
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+/* text inputs draw their own focus: a 1px ink border plus a soft ring */
+input[type=email]:focus-visible { outline: none; }
+
+/* the site's primary button: red gradient pill with a round arrow chip */
+.btn-red {
+  background: linear-gradient(180deg, var(--color-red-fill-2), var(--color-red-fill));
+  color: #fff;
+  box-shadow: 0 20px 40px -20px rgba(225,39,48,.65), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.btn-red:hover { box-shadow: 0 26px 48px -20px rgba(225,39,48,.75), inset 0 1px 0 rgba(255,255,255,.25); }
+.btn .arw { transition: transform .5s var(--ease-enter); }
+.btn:hover .arw { transform: rotate(45deg); }
+
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
