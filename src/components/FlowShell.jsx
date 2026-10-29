@@ -25,12 +25,12 @@ export default function FlowShell({ step, onBack, children, wide = false }) {
       </header>
 
       <nav aria-label="Progress" className="mx-auto mt-5 w-full max-w-[1120px] px-4 sm:mt-7 sm:px-8">
-        <ol className="flex items-center gap-2">
+        <ol className="mx-auto flex max-w-[400px] items-center gap-2 sm:max-w-none">
           {STEPS.map((label, i) => {
             const done = i < step
             const current = i === step
             return (
-              <li key={label} className="flex flex-1 items-center gap-2" aria-current={current ? 'step' : undefined}>
+              <li key={label} className={`flex items-center gap-2 ${i < STEPS.length - 1 ? 'flex-1' : 'flex-none'}`} aria-current={current ? 'step' : undefined}>
                 <span className={`grid h-6 w-6 flex-none place-items-center rounded-full text-[11.5px] font-bold ${done ? 'bg-ink text-white' : current ? 'bg-red text-white' : 'bg-paper-2 text-muted'}`}>
                   {done ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" /> : i + 1}
                 </span>
