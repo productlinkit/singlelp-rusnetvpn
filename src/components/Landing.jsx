@@ -12,7 +12,7 @@ import { PLANS, BEST_DEAL, money } from '../lib/plans.js'
 const BENEFITS = [
   { icon: Globe2, title: '700+ servers', text: 'in 90+ countries', mTitle: '700+ servers', mText: '90+ countries' },
   { icon: ShieldCheck, title: 'Strict no-logs', text: 'No browsing or traffic logs', mTitle: 'No-logs policy', mText: 'Strict policy' },
-  { icon: RotateCcw, title: '30-day money-back', text: 'Full refund, no questions', mTitle: '30-day refund', mText: 'Money-back' },
+  { icon: RotateCcw, title: '30-day refund', text: 'Money-back guarantee', mTitle: '30-day refund', mText: 'Money-back' },
 ]
 
 const best = PLANS.find((p) => p.id === BEST_DEAL)
@@ -23,18 +23,19 @@ const BASE_W = 300
 const BASE_H = 614
 function useFit() {
   const ref = useRef(null)
-  const [scale, setScale] = useState(1)
+  const [fit, setFit] = useState({ scale: 1, room: 0 })
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const ro = new ResizeObserver(([e]) => {
       const { width, height } = e.contentRect
-      setScale(Math.min(height / BASE_H, width / BASE_W, 1.08))
+      const scale = Math.min(height / BASE_H, width / BASE_W, 1.08)
+      setFit({ scale, room: (width / scale - BASE_W) / 2 })
     })
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
-  return [ref, scale]
+  return [ref, fit]
 }
 
 const rise = (d = 0) => ({
@@ -46,7 +47,11 @@ const rise = (d = 0) => ({
 export default function Landing({ onStart }) {
   const demo = useDemoLoop()
   const on = demo === 'on'
-  const [fitRef, scale] = useFit()
+  const [fitRef, { scale, room }] = useFit()
+  // Floating cards may tuck 40px over the device, never past the column edge.
+  const showChips = room >= 50
+  const chipL = Math.min(140, room + 40)
+  const chipR = Math.min(128, room + 40)
 
   useEffect(() => { track(EVENTS.LP_VIEWED) }, [])
 
@@ -58,33 +63,42 @@ export default function Landing({ onStart }) {
         <div className="absolute inset-0 [background-image:radial-gradient(rgba(14,18,22,.07)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_at_70%_45%,black,transparent_70%)]" />
       </div>
 
-      <div className="mx-auto flex w-full max-w-[1280px] flex-1 min-h-0 flex-col px-4 sm:px-8 lg:px-14">
-        <motion.div {...rise(0)} className="flex flex-none items-center pt-4 max-sm:justify-center sm:pt-6 lg:pt-8">
-          <Logo className="h-6 w-auto text-ink sm:h-7" />
+      <div className="mx-auto flex w-full max-w-[1280px] flex-1 min-h-0 flex-col px-4 sm:px-8 lg:px-14 short:px-6!">
+        <motion.div {...rise(0)} className="flex flex-none items-center justify-center pt-4 sm:pt-6 lg:justify-start lg:pt-8 short:justify-start! short:pt-3!">
+          <Logo className="h-6 w-auto text-ink sm:h-7 short:h-5!" />
         </motion.div>
 
-        <div className="grid flex-1 min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-5 sm:gap-5 sm:py-5 lg:grid-cols-[1.08fr_.92fr] lg:grid-rows-1 lg:items-center lg:gap-12 lg:py-6">
-          {/* copy column: on mobile its children join the grid so the phone sits between them */}
-          <div className="contents lg:flex lg:flex-col lg:justify-center">
-            <div className="order-1 max-sm:text-center">
-              <motion.h1 {...rise(.05)} className="text-[clamp(30px,8.6vw,40px)] text-balance sm:text-[52px] lg:text-[clamp(52px,5.6vw,80px)]">
+        <div className="grid flex-1 min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-5 sm:gap-5 sm:py-5 wide:grid-cols-[1.08fr_.92fr] wide:grid-rows-1 wide:items-center wide:gap-12 lg:py-6 short:grid-cols-[1.3fr_.7fr]! short:gap-6! short:py-2!">
+          {/* copy column: when stacked its children join the grid so the phone sits between them */}
+          <div className="contents wide:flex wide:flex-col wide:justify-center">
+            <div className="order-1 text-center wide:text-left">
+              <motion.h1 {...rise(.05)} className="text-[clamp(30px,8.6vw,40px)] text-balance sm:text-[52px] lg:text-[clamp(52px,5.6vw,80px)] short:text-[clamp(26px,4.4vw,36px)]!">
                 Privacy Shouldn’t Be <span className="font-light tracking-[-.026em] text-red">Complicated.</span>
               </motion.h1>
-              <motion.p {...rise(.12)} className="mt-3 max-w-[30rem] text-[14.5px] leading-[1.55] text-body max-sm:mx-auto max-sm:max-w-[19rem] sm:mt-4 sm:text-[17px] lg:mt-6 lg:text-[18.5px] lg:leading-[1.6]">
+              <motion.p {...rise(.12)} className="mx-auto mt-3 max-w-[19rem] text-[14.5px] leading-[1.55] text-body sm:mt-4 sm:max-w-[30rem] sm:text-[17px] wide:mx-0 lg:mt-6 lg:text-[18.5px] lg:leading-[1.6] short:mt-2! short:text-[14px]!">
                 Protect your connection with a VPN that’s simple to set up and easy to use.
               </motion.p>
             </div>
 
-            <div className="order-3 lg:mt-9">
-              <motion.ul {...rise(.2)} className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 sm:grid sm:grid-cols-3 sm:gap-3 lg:max-w-[34rem]" aria-label="What you get">
-                {BENEFITS.map(({ icon: Icon, title, text, mTitle, mText }) => (
-                  <li key={title} className="flex items-center gap-1.5 sm:items-start sm:gap-2.5 sm:rounded-2xl sm:border sm:border-ink/[.07] sm:bg-white/70 sm:p-3.5 sm:backdrop-blur">
-                    <span className="hidden h-8 w-8 flex-none place-items-center rounded-full bg-red-tint text-red-text sm:grid">
+            <div className="order-3 lg:mt-9 short:mt-4!">
+              {/* compact check list: phones, either way up */}
+              <motion.ul {...rise(.2)} className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 sm:hidden short:flex! short:justify-start!" aria-label="What you get">
+                {BENEFITS.map(({ mTitle }) => (
+                  <li key={mTitle} className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 flex-none text-red" strokeWidth={3} aria-hidden="true" />
+                    <span className="text-[12.5px] font-semibold text-ink">{mTitle}</span>
+                  </li>
+                ))}
+              </motion.ul>
+
+              {/* cards: tablets and up */}
+              <motion.ul {...rise(.2)} className="mx-auto hidden max-w-[40rem] grid-cols-3 gap-3 sm:grid wide:mx-0 lg:max-w-[34rem] short:hidden!" aria-label="What you get">
+                {BENEFITS.map(({ icon: Icon, title, text }) => (
+                  <li key={title} className="flex items-start gap-2.5 rounded-2xl border border-ink/[.07] bg-white/70 p-3.5 text-left backdrop-blur lg:flex-col xl:flex-row">
+                    <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-red-tint text-red-text">
                       <Icon className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
                     </span>
-                    <Check className="h-3.5 w-3.5 flex-none text-red sm:hidden" strokeWidth={3} aria-hidden="true" />
-                    <span className="text-[12.5px] font-semibold text-ink sm:hidden">{mTitle}</span>
-                    <span className="min-w-0 max-sm:hidden">
+                    <span className="min-w-0">
                       <b className="block text-[14px] font-semibold leading-tight text-ink">{title}</b>
                       <span className="mt-0.5 block text-[13px] leading-snug text-muted">{text}</span>
                     </span>
@@ -92,14 +106,14 @@ export default function Landing({ onStart }) {
                 ))}
               </motion.ul>
 
-              <motion.div {...rise(.28)} className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:flex-row sm:items-center sm:gap-5 lg:mt-8">
+              <motion.div {...rise(.28)} className="mt-4 flex flex-col gap-2.5 sm:mt-6 sm:flex-row sm:items-center sm:justify-center sm:gap-5 wide:justify-start lg:mt-8 short:mt-4! short:gap-4!">
                 <Button
                   className="w-full sm:w-auto"
                   onClick={() => { track(EVENTS.CTA_CLICKED, { location: 'hero' }); onStart() }}
                 >
                   Get RusVPN
                 </Button>
-                <p className="text-center text-[12.5px] leading-snug text-muted sm:text-left sm:text-[13.5px]">
+                <p className="text-center text-[12.5px] leading-snug text-muted sm:text-left sm:text-[13.5px] short:text-[12.5px]!">
                   From <b className="tnum font-semibold text-ink">{money(best.perMonth)}/mo</b><span className="sm:hidden"> · No password needed</span><span className="max-sm:hidden"> on the 1-year plan.</span>
                   <br className="hidden sm:block" /><span className="max-sm:hidden"> No password needed to start.</span>
                 </p>
@@ -112,7 +126,7 @@ export default function Landing({ onStart }) {
             initial={{ opacity: 0, y: 24, scale: .97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: .9, delay: .15, ease: [.21, .78, .26, 1] }}
-            className="relative order-2 flex h-full max-h-[min(440px,100%)] min-h-0 flex-col self-center lg:h-[min(680px,80vh)] lg:max-h-none"
+            className="relative order-2 flex h-full max-h-[min(440px,100%)] min-h-0 flex-col self-center sm:max-h-[min(580px,100%)] wide:h-[min(680px,80vh)] wide:max-h-none short:h-[86dvh]!"
           >
             <div className="relative min-h-0 flex-1">
             <div ref={fitRef} className="absolute inset-0 flex items-center justify-center">
@@ -121,11 +135,11 @@ export default function Landing({ onStart }) {
               <PhoneMockup state={demo} className="h-full" />
 
               {/* floating chips, in the style of the site's hero chips */}
-              <motion.div {...rise(.6)} className="absolute -left-[140px] top-[12%] hidden items-center gap-2 rounded-full border border-white/70 bg-white/90 px-4 py-2.5 text-[13.5px] font-semibold shadow-[0_14px_30px_-16px_rgba(14,18,22,.5)] backdrop-blur-md sm:inline-flex">
+              <motion.div {...rise(.6)} style={{ left: -chipL }} className={`absolute top-[12%] items-center gap-2 whitespace-nowrap rounded-full border border-white/70 bg-white/90 px-4 py-2.5 text-[13.5px] font-semibold shadow-[0_14px_30px_-16px_rgba(14,18,22,.5)] backdrop-blur-md ${showChips ? 'hidden sm:inline-flex' : 'hidden'}`}>
                 <Server className="h-3.5 w-3.5 text-red" aria-hidden="true" /> 700+ servers worldwide
               </motion.div>
 
-              <motion.div {...rise(.75)} className="absolute -right-[128px] top-[34%] hidden w-[210px] rounded-[20px] border border-white/80 bg-white/95 p-3.5 shadow-[0_30px_60px_-34px_rgba(14,18,22,.45)] backdrop-blur-lg sm:block" aria-hidden="true">
+              <motion.div {...rise(.75)} style={{ right: -chipR }} className={`absolute top-[34%] w-[210px] rounded-[20px] border border-white/80 bg-white/95 p-3.5 shadow-[0_30px_60px_-34px_rgba(14,18,22,.45)] backdrop-blur-lg ${showChips ? 'hidden sm:block' : 'hidden'}`} aria-hidden="true">
                 <div className="flex items-center justify-between">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.span key={on ? 'on' : 'off'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -151,7 +165,7 @@ export default function Landing({ onStart }) {
             </div>
 
             </div>
-            <p className="mt-2 flex-none text-center text-[10.5px] text-muted sm:text-[11px]">
+            <p className="mt-2 flex-none text-center text-[10.5px] text-muted sm:text-[11px] short:mt-1!">
               Animated app preview — not a live connection
             </p>
           </motion.div>

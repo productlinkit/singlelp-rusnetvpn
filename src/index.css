@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Two-column hero: real desktops, plus phones held sideways (too short to stack). */
+@custom-variant wide {
+  @media (min-width: 1024px) { @slot; }
+  @media (orientation: landscape) and (max-height: 540px) and (min-width: 560px) { @slot; }
+}
+/* Phones held sideways: everything gets tighter. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 540px) and (min-width: 560px));
+
 /* Tokens taken from rusnetvpn.vercel.app (commit 8fc5753) so the campaign page
    reads as the same brand: red accent, warm paper, ink, Host Grotesk. */
 @theme {
