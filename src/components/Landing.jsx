@@ -180,7 +180,6 @@ export default function Landing({ onStart }) {
                   />
                 )}
               </div>
-              <p className="mt-2 whitespace-nowrap text-[10.5px] text-muted sm:text-[11px] short:mt-1! short:text-[9.5px]!">Animated app preview — not a live connection</p>
             </div>
           </motion.div>
         </div>

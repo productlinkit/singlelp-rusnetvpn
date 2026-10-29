@@ -11,20 +11,20 @@ import {
 //
 // Each scene: which screen is up, the VPN state, and what is being tapped.
 const SCENES = [
-  { screen: 'home', vpn: 'off', ms: 1700 },
-  { screen: 'home', vpn: 'off', tap: 'tab-servers', ms: 550 },
-  { screen: 'servers', vpn: 'off', ms: 1300 },
-  { screen: 'servers', vpn: 'off', tap: 'country', ms: 500 },
-  { screen: 'servers', vpn: 'off', open: true, ms: 1100 },
-  { screen: 'servers', vpn: 'off', open: true, tap: 'city', ms: 600 },
-  { screen: 'home', vpn: 'off', tap: 'connect', ms: 900 },
-  { screen: 'home', vpn: 'connecting', ms: 1600 },
-  { screen: 'home', vpn: 'on', ms: 2400 },
-  { screen: 'home', vpn: 'on', tap: 'tab-menu', ms: 550 },
-  { screen: 'menu', vpn: 'on', ms: 2800 },
-  { screen: 'menu', vpn: 'on', tap: 'tab-home', ms: 550 },
-  { screen: 'home', vpn: 'on', ms: 1400 },
-  { screen: 'home', vpn: 'on', tap: 'connect', ms: 600 },
+  { screen: 'home', vpn: 'off', ms: 1000 },
+  { screen: 'home', vpn: 'off', tap: 'tab-servers', ms: 350 },
+  { screen: 'servers', vpn: 'off', ms: 750 },
+  { screen: 'servers', vpn: 'off', tap: 'country', ms: 350 },
+  { screen: 'servers', vpn: 'off', open: true, ms: 700 },
+  { screen: 'servers', vpn: 'off', open: true, tap: 'city', ms: 450 },
+  { screen: 'home', vpn: 'off', tap: 'connect', ms: 550 },
+  { screen: 'home', vpn: 'connecting', ms: 1000 },
+  { screen: 'home', vpn: 'on', ms: 1500 },
+  { screen: 'home', vpn: 'on', tap: 'tab-menu', ms: 350 },
+  { screen: 'menu', vpn: 'on', ms: 1700 },
+  { screen: 'menu', vpn: 'on', tap: 'tab-home', ms: 350 },
+  { screen: 'home', vpn: 'on', ms: 800 },
+  { screen: 'home', vpn: 'on', tap: 'connect', ms: 400 },
 ]
 const STILL = { screen: 'home', vpn: 'on' }
 
@@ -81,7 +81,7 @@ function Tap({ show, className = '' }) {
           initial={{ scale: .3, opacity: 0 }}
           animate={{ scale: [0.3, 1, 0.85], opacity: [0, 1, .9] }}
           exit={{ scale: 1.6, opacity: 0 }}
-          transition={{ duration: .45 }}
+          transition={{ duration: .3 }}
         />
       )}
     </AnimatePresence>
@@ -90,8 +90,8 @@ function Tap({ show, className = '' }) {
 
 const screenAnim = {
   initial: { opacity: 0, x: 14 },
-  animate: { opacity: 1, x: 0, transition: { duration: .35, ease: [.21, .78, .26, 1] } },
-  exit: { opacity: 0, x: -14, transition: { duration: .2 } },
+  animate: { opacity: 1, x: 0, transition: { duration: .25, ease: [.21, .78, .26, 1] } },
+  exit: { opacity: 0, x: -14, transition: { duration: .14 } },
 }
 
 /* ---------- screens ---------- */
@@ -193,7 +193,7 @@ function ServersScreen({ open, tap }) {
               {i === 0 && (
                 <AnimatePresence initial={false}>
                   {isOpen && (
-                    <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .3 }} className="overflow-hidden">
+                    <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: .22 }} className="overflow-hidden">
                       {SERVERS.map((name, j) => {
                         const picked = j === 0 && tap === 'city'
                         return (
