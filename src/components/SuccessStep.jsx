@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Check, Mail } from 'lucide-react'
 import Button from './Button.jsx'
+import { ACCOUNT } from '../lib/account.js'
 import { money, renewalDate } from '../lib/plans.js'
 
-export default function SuccessStep({ email, plan, method, onAccess }) {
+export default function SuccessStep({ email, account, plan, onAccess }) {
   const h = useRef(null)
+  const isNew = account === ACCOUNT.NEW
   useEffect(() => { h.current?.focus() }, [])
 
   return (
@@ -18,18 +20,21 @@ export default function SuccessStep({ email, plan, method, onAccess }) {
 
       <h1 ref={h} tabIndex={-1} className="mt-7 text-[38px] outline-none sm:text-[48px]">You’re All <span className="font-light text-red">Set.</span></h1>
       <p className="mx-auto mt-3 max-w-[26rem] text-[16px] leading-relaxed text-body">
-        Your RusVPN access is ready. Check your email for your secure sign-in link.
+        {isNew
+          ? 'Your RusVPN account is ready. Check your email for your password.'
+          : 'Your subscription is active. Log in with your existing password.'}
       </p>
 
       <div className="mx-auto mt-7 rounded-[22px] border border-ink/[.07] bg-white p-5 text-left text-[14px]">
         <dl className="space-y-2.5">
           <div className="flex justify-between gap-3"><dt className="text-muted">Plan</dt><dd className="font-medium">RusVPN · {plan.label}</dd></div>
-          <div className="flex justify-between gap-3"><dt className="text-muted">Paid</dt><dd className="tnum font-medium">{money(plan.price)} · {method}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-muted">Payment method</dt><dd className="font-medium">Credit card</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted">Next renewal</dt><dd className="font-medium">{renewalDate(plan)}</dd></div>
+          <div className="flex items-end justify-between gap-3 border-t border-ink/[.07] pt-3"><dt className="font-semibold text-ink">Total paid</dt><dd className="tnum text-[26px] font-bold leading-none tracking-[-.03em] text-ink">{money(plan.price)}</dd></div>
         </dl>
         <p className="mt-4 flex items-center gap-2 rounded-xl bg-paper p-3 text-[13px] text-ink-2">
           <Mail className="h-4 w-4 flex-none text-red" aria-hidden="true" />
-          <span className="min-w-0">Sign-in link for <b className="break-all font-semibold">{email}</b></span>
+          <span className="min-w-0">{isNew ? 'Password sent to' : 'Account'} <b className="break-all font-semibold">{email}</b></span>
         </p>
       </div>
 

@@ -1,14 +1,14 @@
 import { ArrowLeft, Check, Lock } from 'lucide-react'
 import Logo from './Logo.jsx'
 
-const STEPS = ['Email', 'Plan & payment', 'Access']
+const STEPS = ['Checkout', 'Access']
 
 // Shared frame for the post-click screens: logo, progress, optional back link.
 // Still no navbar or footer — nothing to leak attention out of the funnel.
 export default function FlowShell({ step, onBack, children, wide = false }) {
   return (
     <div className="min-h-dvh">
-      <header className="mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-5 pt-4 sm:px-8 sm:pt-6">
+      <header className={`mx-auto flex w-full max-w-[1120px] items-center justify-between gap-4 px-5 pt-4 sm:px-8 sm:pt-6 ${wide ? 'lg:pt-4' : ''}`}>
         <div className="flex items-center gap-2">
           {onBack ? (
             <button onClick={onBack} className="flex h-10 w-10 items-center justify-start rounded-full text-ink hover:text-red" aria-label="Back">
@@ -17,14 +17,14 @@ export default function FlowShell({ step, onBack, children, wide = false }) {
           ) : null}
           <Logo className="h-6 w-auto text-ink" />
         </div>
-        {step < 2 && (
+        {step < 1 && (
           <span className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
             <Lock className="h-3.5 w-3.5" aria-hidden="true" /> Secure checkout
           </span>
         )}
       </header>
 
-      <nav aria-label="Progress" className="mx-auto mt-5 w-full max-w-[1120px] px-5 sm:mt-7 sm:px-8">
+      <nav aria-label="Progress" className={`mx-auto mt-5 w-full max-w-[1120px] px-5 sm:mt-7 sm:px-8 ${wide ? 'lg:mt-3' : ''}`}>
         <ol className="mx-auto flex max-w-[400px] items-center gap-2 sm:max-w-none">
           {STEPS.map((label, i) => {
             const done = i < step
@@ -42,7 +42,7 @@ export default function FlowShell({ step, onBack, children, wide = false }) {
         </ol>
       </nav>
 
-      <div className={`mx-auto w-full px-5 pb-28 pt-8 sm:px-8 sm:pt-12 lg:pb-16 ${wide ? 'max-w-[1120px]' : 'max-w-[520px]'}`}>
+      <div className={`mx-auto w-full px-5 pb-28 pt-8 sm:px-8 sm:pt-12 ${wide ? 'max-w-[520px] lg:max-w-[1120px] lg:pb-5 lg:pt-5' : 'max-w-[520px] lg:pb-16'}`}>
         {children}
       </div>
     </div>

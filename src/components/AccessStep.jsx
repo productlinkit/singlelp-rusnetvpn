@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Loader2, Download, Smartphone, Monitor, Laptop, Package, Power, RotateCw } from 'lucide-react'
 import Button from './Button.jsx'
+import { ACCOUNT } from '../lib/account.js'
 import { renewalDate } from '../lib/plans.js'
 import { track, EVENTS } from '../lib/track.js'
 
@@ -23,14 +24,16 @@ function detect() {
   return 'windows'
 }
 
-export default function AccessStep({ email, plan }) {
-  // What the backend does after the provider's "payment succeeded" webhook.
-  const STEPS = useMemo(() => [
-    'Payment confirmed',
-    `Subscription active · ${plan.label}, renews ${renewalDate(plan)}`,
-    `Linked to ${email}`,
-    'Secure sign-in link sent',
-  ], [email, plan])
+export default function AccessStep({ email, account, plan }) {
+  const isNew = account === ACCOUNT.NEW
+  // What the backend does after the provider's "payment succeeded" webhook, or
+  // after login for someone who is already subscribed.
+  const STEPS = useMemo(() => {
+    if (account === ACCOUNT.SUBSCRIBED) return [`Logged in as ${email}`, 'Subscription active']
+    const active = `Subscription active · ${plan.label}, renews ${renewalDate(plan)}`
+    if (account === ACCOUNT.REGISTERED) return ['Payment confirmed', active, `Linked to ${email}`]
+    return ['Payment confirmed', `Account created for ${email}`, active, 'Password sent to your email']
+  }, [email, account, plan])
 
   const [done, setDone] = useState(0)
   const [activated, setActivated] = useState(false)
@@ -65,7 +68,7 @@ export default function AccessStep({ email, plan }) {
   return (
     <section>
       <h1 className="text-[32px] sm:text-[42px]">Your access is <span className="font-light text-red">ready.</span></h1>
-      <p className="mt-3 text-[15.5px] leading-relaxed text-body">Install the app, sign in with the link we emailed, and press Connect.</p>
+      <p className="mt-3 text-[15.5px] leading-relaxed text-body">Install the app, log in with {isNew ? 'the password we emailed' : 'your password'}, and press Connect.</p>
 
       <ol className="mt-7 space-y-3 rounded-[22px] border border-ink/[.07] bg-white p-5" aria-live="polite">
         {STEPS.map((s, i) => {
@@ -80,7 +83,7 @@ export default function AccessStep({ email, plan }) {
           )
         })}
       </ol>
-      <p className="mt-2 text-[12px] text-muted">Prototype: these steps are simulated. In production they come from the payment webhook.</p>
+      <p className="mt-2 text-[12px] text-muted">Prototype: these steps are simulated. In production they come from the backend.</p>
 
       <AnimatePresence>
         {ready && (
@@ -114,7 +117,7 @@ export default function AccessStep({ email, plan }) {
                   </motion.div>
                 ) : (
                   <motion.div key="off" exit={{ opacity: 0 }}>
-                    <p className="text-[14px] text-body">Already installed? Activate it here and skip the email.</p>
+                    <p className="text-[14px] text-body">Already installed? Activate it here.</p>
                     <Button className="mt-4 w-full" busy={busy} busyLabel="Activating…" onClick={activate}>Open RusVPN</Button>
                   </motion.div>
                 )}
@@ -122,10 +125,10 @@ export default function AccessStep({ email, plan }) {
             </div>
 
             <p className="mt-6 text-center text-[13px] text-muted">
-              Didn’t get the email?{' '}
-              <button disabled={cooldown > 0} onClick={() => { setCooldown(30); track('signin_link_resent') }}
+              {isNew ? 'Didn’t get the email?' : 'Forgot your password?'}{' '}
+              <button disabled={cooldown > 0} onClick={() => { setCooldown(30); track(isNew ? 'password_resent' : 'password_reset_requested') }}
                 className="inline-flex items-center gap-1 font-semibold text-ink underline decoration-red/60 underline-offset-2 disabled:cursor-default disabled:text-muted disabled:no-underline">
-                <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />{cooldown > 0 ? `Sent — resend in ${cooldown}s` : 'Resend link'}
+                <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />{cooldown > 0 ? `Sent — resend in ${cooldown}s` : isNew ? 'Resend password' : 'Reset password'}
               </button>
             </p>
           </motion.div>

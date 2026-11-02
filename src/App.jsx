@@ -3,11 +3,11 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Landing from './components/Landing.jsx'
 import FlowShell from './components/FlowShell.jsx'
 import EmailStep from './components/EmailStep.jsx'
-import CheckoutStep, { METHODS } from './components/CheckoutStep.jsx'
-import PaymentPreview from './components/PaymentPreview.jsx'
+import CheckoutStep from './components/CheckoutStep.jsx'
 import SuccessStep from './components/SuccessStep.jsx'
 import AccessStep from './components/AccessStep.jsx'
 import EventLog from './components/EventLog.jsx'
+import { ACCOUNT } from './lib/account.js'
 import { PLANS, DEFAULT_PLAN } from './lib/plans.js'
 import { track, EVENTS } from './lib/track.js'
 
@@ -26,12 +26,14 @@ const page = {
 export default function App() {
   const [step, setStepState] = useState('lp')
   const [email, setEmail] = useState('')
+  const [account, setAccount] = useState(null)
   const [planId, setPlanId] = useState(DEFAULT_PLAN)
-  const [method, setMethod] = useState('card')
-  const [paying, setPaying] = useState(false)
+  const [charging, setCharging] = useState(false)
   const [payError, setPayError] = useState(false)
   const attempts = useRef(0)
   const paid = useRef(false)
+  const started = useRef(false)
+  const chargeTimer = useRef(null)
 
   const plan = PLANS.find((p) => p.id === planId)
 
@@ -52,75 +54,91 @@ export default function App() {
         setStepState('success')
         return
       }
-      setPaying(false)
+      clearTimeout(chargeTimer.current)
+      setCharging(false)
       setStepState(target)
     }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  function onPayResult(result) {
+  function onEmailChecked(value, status) {
+    setEmail(value)
+    setAccount(status)
+    if (status !== ACCOUNT.SUBSCRIBED && !started.current) {
+      started.current = true
+      track(EVENTS.CHECKOUT_STARTED, { plan: planId })
+    }
+  }
+
+  function onPay() {
+    setPayError(false)
+    // stands in for the provider's card charge
+    setCharging(true)
+    chargeTimer.current = setTimeout(() => {
+      setCharging(false)
+      onPayResult()
+    }, 1800)
+  }
+
+  function onPayResult() {
     attempts.current += 1
-    setPaying(false)
-    if (result === 'declined' || (DECLINE_FIRST && attempts.current === 1)) {
+    if (DECLINE_FIRST && attempts.current === 1) {
       setPayError(true)
-      track('payment_failed', { plan: planId, method })
+      track('payment_failed', { plan: planId })
       return
     }
     paid.current = true
     setPayError(false)
-    track(EVENTS.PAYMENT_COMPLETED, { plan: planId, method, value: plan.price, currency: 'USD' })
+    track(EVENTS.PAYMENT_COMPLETED, { plan: planId, value: plan.price, currency: 'USD', account })
     go('success', { replace: true })
   }
 
-  const methodLabel = METHODS.find((m) => m.id === method).label
+  const formOpen = account === ACCOUNT.NEW || account === ACCOUNT.REGISTERED
 
   return (
     <>
       <AnimatePresence mode="wait">
         <motion.div key={step} {...page}>
-          {step === 'lp' && <Landing onStart={() => go('email')} />}
-
-          {step === 'email' && (
-            <FlowShell step={0} onBack={() => window.history.back()}>
-              <EmailStep initial={email} onDone={(v) => { setEmail(v); go('checkout') }} />
-            </FlowShell>
-          )}
+          {step === 'lp' && <Landing onStart={() => go('checkout')} />}
 
           {step === 'checkout' && (
-            <FlowShell step={1} wide onBack={() => window.history.back()}>
-              <CheckoutStep
-                email={email}
-                planId={planId}
-                setPlanId={setPlanId}
-                method={method}
-                setMethod={(m) => { setMethod(m); setPayError(false) }}
-                error={payError}
-                onEditEmail={() => window.history.back()}
-                onPay={() => { setPayError(false); setPaying(true) }}
-              />
+            <FlowShell step={0} wide={formOpen} onBack={() => window.history.back()}>
+              <div className={formOpen ? 'lg:grid lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-x-10' : ''}>
+                <EmailStep
+                  initial={email}
+                  account={account}
+                  compact={formOpen}
+                  locked={charging}
+                  onChecked={onEmailChecked}
+                  onEdit={() => { setAccount(null); setPayError(false) }}
+                  onLogin={() => { track('login_clicked'); go('access') }}
+                />
+                {formOpen && (
+                  <CheckoutStep
+                    planId={planId}
+                    setPlanId={setPlanId}
+                    error={payError}
+                    charging={charging}
+                    onPay={onPay}
+                  />
+                )}
+              </div>
             </FlowShell>
           )}
 
           {step === 'success' && (
-            <FlowShell step={2}>
-              <SuccessStep email={email} plan={plan} method={methodLabel} onAccess={() => go('access')} />
+            <FlowShell step={1}>
+              <SuccessStep email={email} account={account} plan={plan} onAccess={() => go('access')} />
             </FlowShell>
           )}
 
           {step === 'access' && (
-            <FlowShell step={2}>
-              <AccessStep email={email} plan={plan} />
+            <FlowShell step={1}>
+              <AccessStep email={email} account={account} plan={plan} />
             </FlowShell>
           )}
         </motion.div>
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {paying && (
-          <PaymentPreview plan={plan} method={method} email={email} decline={false}
-            onCancel={() => setPaying(false)} onResult={onPayResult} />
-        )}
       </AnimatePresence>
 
       {DEBUG && <EventLog />}
