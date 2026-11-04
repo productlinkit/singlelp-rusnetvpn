@@ -2,10 +2,11 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Check, Mail } from 'lucide-react'
 import Button from './Button.jsx'
+import TransactionId from './TransactionId.jsx'
 import { ACCOUNT } from '../lib/account.js'
 import { money, renewalDate } from '../lib/plans.js'
 
-export default function SuccessStep({ email, account, plan, onAccess }) {
+export default function SuccessStep({ email, account, plan, txId, onAccess }) {
   const h = useRef(null)
   const isNew = account === ACCOUNT.NEW
   useEffect(() => { h.current?.focus() }, [])
@@ -27,6 +28,7 @@ export default function SuccessStep({ email, account, plan, onAccess }) {
 
       <div className="mx-auto mt-7 rounded-[22px] border border-ink/[.07] bg-white p-5 text-left text-[14px]">
         <dl className="space-y-2.5">
+          <TransactionId id={txId} />
           <div className="flex justify-between gap-3"><dt className="text-muted">Plan</dt><dd className="font-medium">RusVPN · {plan.label}</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted">Payment method</dt><dd className="font-medium">Credit card</dd></div>
           <div className="flex justify-between gap-3"><dt className="text-muted">Next renewal</dt><dd className="font-medium">{renewalDate(plan)}</dd></div>

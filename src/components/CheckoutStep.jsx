@@ -1,10 +1,10 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Lock, AlertCircle, RotateCcw, RefreshCw } from 'lucide-react'
+import { Lock, RotateCcw, RefreshCw } from 'lucide-react'
 import Button from './Button.jsx'
 import { PayLogo } from './PayLogos.jsx'
 import { PLANS, BEST_DEAL, money, renewalDate } from '../lib/plans.js'
-import { validateCard } from '../lib/card.js'
+import { validateCard, demoOutcome } from '../lib/card.js'
 
 const CARD_FIELDS = [
   { key: 'number', label: 'Card number', placeholder: '1234 5678 9012 3456', autoComplete: 'cc-number', span: 'col-span-2' },
@@ -17,15 +17,12 @@ const reveal = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, 
 // Opens under the email field once the address is known not to have a
 // subscription. Kept deliberately short for thumbs: one list of plans, the card
 // fields, one total, one button.
-export default function CheckoutStep({ planId, setPlanId, error, charging, onPay }) {
+export default function CheckoutStep({ planId, setPlanId, charging, onPay }) {
   const id = useId()
   const plan = PLANS.find((p) => p.id === planId)
-  const errRef = useRef(null)
   // Card details stay in this component: never lifted, tracked or sent anywhere.
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '' })
   const [cardErrors, setCardErrors] = useState({})
-
-  useEffect(() => { if (error) errRef.current?.focus() }, [error])
 
   function submit(e) {
     e.preventDefault()
@@ -34,7 +31,7 @@ export default function CheckoutStep({ planId, setPlanId, error, charging, onPay
     setCardErrors(errors)
     const first = Object.keys(errors)[0]
     if (first) return document.getElementById(`${id}-${first}`)?.focus()
-    onPay()
+    onPay(demoOutcome(card.number))
   }
 
   function changeCard(field, value) {
@@ -82,16 +79,6 @@ export default function CheckoutStep({ planId, setPlanId, error, charging, onPay
       </motion.div>
 
       <motion.div {...reveal} className="mt-7 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0">
-        {error && (
-          <div ref={errRef} tabIndex={-1} role="alert" className="mb-5 flex gap-3 rounded-2xl border border-red/25 bg-red-tint p-4 text-[14px] text-red-text outline-none lg:mb-3 lg:p-3 lg:text-[13px]">
-            <AlertCircle className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
-            <div>
-              <b className="font-semibold">Your payment didn’t go through.</b>
-              <p className="mt-0.5 text-ink-2">You haven’t been charged. Check your details and try again, or use a different card.</p>
-            </div>
-          </div>
-        )}
-
         {/* card details */}
         <fieldset disabled={charging}>
           <legend className="flex w-full items-center justify-between text-[14px] font-semibold text-ink">

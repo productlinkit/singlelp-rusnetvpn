@@ -4,16 +4,19 @@ import Landing from './components/Landing.jsx'
 import FlowShell from './components/FlowShell.jsx'
 import EmailStep from './components/EmailStep.jsx'
 import CheckoutStep from './components/CheckoutStep.jsx'
+import PendingStep from './components/PendingStep.jsx'
+import FailedStep from './components/FailedStep.jsx'
 import SuccessStep from './components/SuccessStep.jsx'
 import AccessStep from './components/AccessStep.jsx'
 import EventLog from './components/EventLog.jsx'
 import { ACCOUNT } from './lib/account.js'
 import { PLANS, DEFAULT_PLAN } from './lib/plans.js'
 import { track, EVENTS } from './lib/track.js'
+import { newTransactionId } from './lib/transaction.js'
 
 const query = new URLSearchParams(window.location.search)
 const DEBUG = query.has('debug')
-// ?decline=1 makes the first payment attempt fail, to show the error state.
+// ?decline=1 makes the first payment attempt fail, whatever card is entered.
 const DECLINE_FIRST = query.has('decline')
 const PAID_STEPS = ['success', 'access']
 
@@ -29,9 +32,10 @@ export default function App() {
   const [account, setAccount] = useState(null)
   const [planId, setPlanId] = useState(DEFAULT_PLAN)
   const [charging, setCharging] = useState(false)
-  const [payError, setPayError] = useState(false)
+  const [txId, setTxId] = useState(null)
   const attempts = useRef(0)
-  const paid = useRef(false)
+  // 'pending' or 'success' once a payment is submitted; checkout is then closed
+  const settled = useRef(null)
   const started = useRef(false)
   const chargeTimer = useRef(null)
 
@@ -49,9 +53,10 @@ export default function App() {
     const onPop = (e) => {
       const target = e.state?.step || 'lp'
       // after payment there is no way back into checkout
-      if (paid.current && !PAID_STEPS.includes(target)) {
-        window.history.pushState({ step: 'success' }, '')
-        setStepState('success')
+      const allowed = settled.current === 'pending' ? ['pending'] : PAID_STEPS
+      if (settled.current && !allowed.includes(target)) {
+        window.history.pushState({ step: settled.current }, '')
+        setStepState(settled.current)
         return
       }
       clearTimeout(chargeTimer.current)
@@ -71,26 +76,36 @@ export default function App() {
     }
   }
 
-  function onPay() {
-    setPayError(false)
+  function onPay(outcome) {
     // stands in for the provider's card charge
+    const id = newTransactionId()
+    setTxId(id)
     setCharging(true)
     chargeTimer.current = setTimeout(() => {
       setCharging(false)
-      onPayResult()
+      onPayResult(outcome, id)
     }, 1800)
   }
 
-  function onPayResult() {
+  function onPayResult(outcome, id) {
     attempts.current += 1
-    if (DECLINE_FIRST && attempts.current === 1) {
-      setPayError(true)
-      track('payment_failed', { plan: planId })
+    if (outcome === 'failed' || (DECLINE_FIRST && attempts.current === 1)) {
+      track(EVENTS.PAYMENT_FAILED, { plan: planId, transaction_id: id })
+      go('failed')
       return
     }
-    paid.current = true
-    setPayError(false)
-    track(EVENTS.PAYMENT_COMPLETED, { plan: planId, value: plan.price, currency: 'USD', account })
+    if (outcome === 'pending') {
+      settled.current = 'pending'
+      track(EVENTS.PAYMENT_PENDING, { plan: planId, value: plan.price, currency: 'USD', account, transaction_id: id })
+      go('pending', { replace: true })
+      return
+    }
+    completePayment(id)
+  }
+
+  function completePayment(id) {
+    settled.current = 'success'
+    track(EVENTS.PAYMENT_COMPLETED, { plan: planId, value: plan.price, currency: 'USD', account, transaction_id: id })
     go('success', { replace: true })
   }
 
@@ -111,14 +126,13 @@ export default function App() {
                   compact={formOpen}
                   locked={charging}
                   onChecked={onEmailChecked}
-                  onEdit={() => { setAccount(null); setPayError(false) }}
+                  onEdit={() => setAccount(null)}
                   onLogin={() => { track('login_clicked'); go('access') }}
                 />
                 {formOpen && (
                   <CheckoutStep
                     planId={planId}
                     setPlanId={setPlanId}
-                    error={payError}
                     charging={charging}
                     onPay={onPay}
                   />
@@ -127,9 +141,21 @@ export default function App() {
             </FlowShell>
           )}
 
+          {step === 'pending' && (
+            <FlowShell step={0}>
+              <PendingStep email={email} plan={plan} txId={txId} onConfirmed={() => completePayment(txId)} />
+            </FlowShell>
+          )}
+
+          {step === 'failed' && (
+            <FlowShell step={0} onBack={() => window.history.back()}>
+              <FailedStep email={email} plan={plan} txId={txId} onRetry={() => window.history.back()} />
+            </FlowShell>
+          )}
+
           {step === 'success' && (
             <FlowShell step={1}>
-              <SuccessStep email={email} account={account} plan={plan} onAccess={() => go('access')} />
+              <SuccessStep email={email} account={account} plan={plan} txId={txId} onAccess={() => go('access')} />
             </FlowShell>
           )}
 

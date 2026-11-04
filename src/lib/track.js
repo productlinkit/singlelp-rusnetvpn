@@ -5,6 +5,8 @@ export const EVENTS = {
   CTA_CLICKED: 'cta_clicked',
   EMAIL_SUBMITTED: 'email_submitted',
   CHECKOUT_STARTED: 'checkout_started',
+  PAYMENT_PENDING: 'payment_pending',
+  PAYMENT_FAILED: 'payment_failed',
   PAYMENT_COMPLETED: 'payment_completed',
   VPN_ACTIVATED: 'vpn_activated',
 }
